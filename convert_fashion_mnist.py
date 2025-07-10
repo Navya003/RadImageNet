@@ -18,8 +18,9 @@ def convert_fashion_mnist_to_dirs_limited(
     print("Fashion-MNIST dataset downloaded.")
 
     # Define class names for Fashion-MNIST
+    # CORRECTED: Removed '/top' from 'T-shirt/top'
     class_names = [
-        'T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
+        'T-shirt', 'Trouser', 'Pullover', 'Dress', 'Coat',
         'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot'
     ]
 
@@ -46,20 +47,20 @@ def convert_fashion_mnist_to_dirs_limited(
             os.makedirs(class_dir, exist_ok=True)
 
             # Fashion-MNIST images are 28x28 grayscale.
-            # We need to resize to 224x224 and convert to 3 channels (RGB)
-            # by stacking the grayscale channel 3 times.
+            # Resize to 224x224 and convert to 3 channels (BGR for OpenCV).
             image_resized = cv2.resize(image, (224, 224), interpolation=cv2.INTER_AREA)
-            image_rgb = np.stack([image_resized, image_resized, image_resized], axis=-1)
+            image_bgr = cv2.cvtColor(image_resized, cv2.COLOR_GRAY2BGR) # Convert to 3 channels (BGR)
 
             image_path = os.path.join(class_dir, f"train_img_{i:05d}.png")
-            cv2.imwrite(image_path, image_rgb)
+            cv2.imwrite(image_path, image_bgr)
 
             train_counts[class_name] += 1
             total_train_saved += 1
 
         # Check if we have enough images for all classes
+        # This condition ensures we stop once all target counts are met.
         if all(count >= num_train_per_class for count in train_counts.values()):
-            break # Stop processing if all classes have enough images
+            break 
 
     print(f"Finished saving {total_train_saved} training images in total.")
 
@@ -76,19 +77,19 @@ def convert_fashion_mnist_to_dirs_limited(
             class_dir = os.path.join(test_output_dir, class_name)
             os.makedirs(class_dir, exist_ok=True)
 
-            # Resize and convert to 3 channels (RGB)
+            # Resize and convert to 3 channels (BGR for OpenCV)
             image_resized = cv2.resize(image, (224, 224), interpolation=cv2.INTER_AREA)
-            image_rgb = np.stack([image_resized, image_resized, image_resized], axis=-1)
+            image_bgr = cv2.cvtColor(image_resized, cv2.COLOR_GRAY2BGR) # Convert to 3 channels (BGR)
 
             image_path = os.path.join(class_dir, f"test_img_{i:05d}.png")
-            cv2.imwrite(image_path, image_rgb)
+            cv2.imwrite(image_path, image_bgr)
 
             test_counts[class_name] += 1
             total_test_saved += 1
-        
+            
         # Check if we have enough images for all classes
         if all(count >= num_test_per_class for count in test_counts.values()):
-            break # Stop processing if all classes have enough images
+            break 
 
     print(f"Finished saving {total_test_saved} test images in total.")
     print(f"Fashion-MNIST conversion complete. Data saved to '{output_base_dir}'")
