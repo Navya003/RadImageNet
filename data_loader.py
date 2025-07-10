@@ -2,6 +2,7 @@ import os
 import cv2 as cv
 import numpy as np
 from sklearn.preprocessing import LabelBinarizer
+import tensorflow as tf # Import TensorFlow
 
 class DataLoader:
     def __init__(self, directory):
@@ -9,34 +10,51 @@ class DataLoader:
 
     def load_train_data(self):
         """
-        Load training data from subdirectories where each subdirectory is a label (category).
+        Load training data paths and labels, returning them as lists.
+        The actual image loading and preprocessing will be done later in the tf.data pipeline.
         """
-        data = []
+        image_paths = []
         labels = []
-        
+
         categories = os.listdir(self.directory)
+        print(f"DataLoader (train): Found categories in directory: {categories}")
         for category in categories:
             path = os.path.join(self.directory, category)
             if os.path.isdir(path):
-                for img in os.listdir(path):
-                    img_path = os.path.join(path, img)
+                print(f"DataLoader (train): Processing category: {category} at {path}")
+                for img_name in os.listdir(path):
+                    img_path = os.path.join(path, img_name)
                     if os.path.isfile(img_path):
-                        im = self.preprocess_images(img_path)
-                        if im is not None:
-                            data.append(im)
-                            labels.append(category)
-                            
-        labels = self.encode_labels(labels)
-        return np.array(data, dtype="float32"), labels, categories
+                        # We only collect paths and labels here.
+                        # Preprocessing (cv2.imread, resize, normalize) will be done in the tf.data map function.
+                        image_paths.append(img_path)
+                        labels.append(category)
+
+        lb = LabelBinarizer()
+        encoded_labels = lb.fit_transform(labels)
+
+        # Ensure all 10 classes are present in the LabelBinarizer's classes_
+        # This is a critical check for the 9-class issue.
+        if len(lb.classes_) != 10:
+            print(f"WARNING: LabelBinarizer detected {len(lb.classes_)} unique classes instead of 10 for training data.")
+            print(f"Detected classes: {lb.classes_}")
+            # You might want to raise an error or handle this more robustly if it's a common issue.
+
+        print(f"DataLoader (train): Total images found: {len(image_paths)}")
+        print(f"DataLoader (train): Total labels found: {len(labels)}")
+        print(f"DataLoader (train): Number of unique labels after encoding: {encoded_labels.shape[1]}")
+
+        # Return paths, encoded labels, and category names.
+        # These will be used to create a tf.data.Dataset in the trainer.
+        return image_paths, encoded_labels, lb.classes_.tolist()
 
     def load_test_data(self):
         """
-        Load test data from subdirectories where each subdirectory is a label (category).
-        It will return data, one-hot encoded labels, category names, AND image paths.
+        Load test data paths and labels, returning them as lists.
+        The actual image loading and preprocessing will be done later in the tf.data pipeline.
         """
-        data = []
+        image_paths = []
         labels = []
-        image_paths = [] # This is already here, just ensure it's returned
 
         categories = os.listdir(self.directory)
         print(f"DataLoader (test): Found categories: {categories} in {self.directory}")
@@ -44,42 +62,32 @@ class DataLoader:
             path = os.path.join(self.directory, category)
             if os.path.isdir(path):
                 print(f"DataLoader (test): Processing category: {category} at {path}")
-                for img in os.listdir(path):
-                    img_path = os.path.join(path, img)
+                for img_name in os.listdir(path):
+                    img_path = os.path.join(path, img_name)
                     if os.path.isfile(img_path):
-                        im = self.preprocess_images(img_path)
-                        if im is not None:
-                            data.append(im)
-                            labels.append(category)
-                            image_paths.append(img_path) # Append path here
+                        image_paths.append(img_path)
+                        labels.append(category)
 
         lb = LabelBinarizer()
         encoded_labels = lb.fit_transform(labels)
-        
-        print(f"DataLoader (test): Final data count: {len(data)}")
-        print(f"DataLoader (test): Final labels count: {len(labels)}")
-        
-        # CORRECTED: Added image_paths to the return statement
-        return np.array(data, dtype="float32"), encoded_labels, lb.classes_.tolist(), image_paths 
 
-    def preprocess_images(self, img_path, img_size=(224, 224)):
-        """
-        Preprocess a single image: load, resize, and normalize.
-        Returns None if image cannot be loaded.
-        """
-        im = cv.imread(img_path)
-        if im is None:
-            print(f"WARNING: preprocess_images: Could not load image from {img_path}")
-            return None
-        im = cv.resize(im, img_size)
-        im = np.array(im) / 255.0
-        return im
+        if len(lb.classes_) != 10:
+            print(f"WARNING: LabelBinarizer detected {len(lb.classes_)} unique classes instead of 10 for test data.")
+            print(f"Detected classes: {lb.classes_}")
 
-    def encode_labels(self, labels):
-        """
-        Convert text labels to one-hot encoded format.
-        """
-        lb = LabelBinarizer()
-        encoded_labels = lb.fit_transform(labels)
-        return encoded_labels
+        print(f"DataLoader (test): Total images found: {len(image_paths)}")
+        print(f"DataLoader (test): Total labels found: {len(labels)}")
+        print(f"DataLoader (test): Number of unique labels after encoding: {encoded_labels.shape[1]}")
 
+        # Return paths, encoded labels, and category names.
+        # These will be used to create a tf.data.Dataset in the evaluator.
+        return image_paths, encoded_labels, lb.classes_.tolist()
+
+    # The preprocess_images method will now be used as a helper function within the tf.data map.
+    # It will be defined in trainer.py and evaluator.py to include model-specific preprocessing.
+    # So, we remove it from DataLoader as it's no longer responsible for the pixel-level preprocessing.
+    # The DataLoader's role is just to find the file paths and their corresponding labels.
+    pass # This class now only has __init__ and load_data methods that return paths/labels.
+
+    # Removed preprocess_images and encode_labels as they are handled differently now.
+    # encode_labels logic is kept inline in load_data methods.
