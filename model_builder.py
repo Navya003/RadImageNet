@@ -7,7 +7,7 @@ import tensorflow as tf # Import tensorflow to access its applications.
 class ModelBuilder:
     def __init__(self, base_model_name, input_shape, num_classes, lr, epochs):
         self.base_model_name = base_model_name
-        self.input_shape = input_shape
+        self.input_shape = input_shape # This will now be (128, 128, 3) from pipeline.py
         self.lr = lr
         self.epochs = epochs
         self.num_classes = num_classes
@@ -61,4 +61,3 @@ class ModelBuilder:
         model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
 
         return model, preprocess_input_fn # MODIFIED: Return preprocess_input_fn
-
