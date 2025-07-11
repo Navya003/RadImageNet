@@ -37,7 +37,7 @@ class ModelTrainer:
         # Decode to tensor
         img = tf.image.decode_image(img, channels=3, expand_animations=False) # Ensure 3 channels
         # Resize
-        img = tf.image.resize(img, (224, 224))
+        img = tf.image.resize(img, (128, 128)) # MODIFIED: Changed to 128x128
         # Apply model-specific preprocessing (e.g., EfficientNet's preprocess_input)
         img = self.preprocess_input_fn(img)
         return img, label
