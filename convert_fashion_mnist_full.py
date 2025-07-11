@@ -34,8 +34,8 @@ def convert_fashion_mnist_to_dirs(output_base_dir="fashion_mnist_full_dataset"):
         os.makedirs(class_output_dir, exist_ok=True) # Ensure class directory exists
 
         # Save image directly into the class directory
-        # Fashion-MNIST images are grayscale (28x28). Resize to 224x224 and convert to 3 channels for consistency.
-        image_resized = cv.resize(image, (224, 224))
+        # Fashion-MNIST images are grayscale (28x28). Resize to 128x128 and convert to 3 channels for consistency.
+        image_resized = cv.resize(image, (128, 128)) # MODIFIED: Resized to 128x128
         image_bgr = cv.cvtColor(image_resized, cv.COLOR_GRAY2BGR) # Convert to 3 channels (BGR for OpenCV)
         
         img_filename = os.path.join(class_output_dir, f"train_img_{i:05d}.png")
@@ -54,7 +54,7 @@ def convert_fashion_mnist_to_dirs(output_base_dir="fashion_mnist_full_dataset"):
         os.makedirs(class_output_dir, exist_ok=True) # Ensure class directory exists
 
         # Save image directly into the class directory
-        image_resized = cv.resize(image, (224, 224))
+        image_resized = cv.resize(image, (128, 128)) # MODIFIED: Resized to 128x128
         image_bgr = cv.cvtColor(image_resized, cv.COLOR_GRAY2BGR) # Convert to 3 channels (BGR for OpenCV)
 
         img_filename = os.path.join(class_output_dir, f"test_img_{i:05d}.png")
@@ -68,5 +68,3 @@ def convert_fashion_mnist_to_dirs(output_base_dir="fashion_mnist_full_dataset"):
 
 if __name__ == "__main__":
     convert_fashion_mnist_to_dirs()
-
-
