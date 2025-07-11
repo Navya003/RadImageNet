@@ -47,8 +47,8 @@ def convert_fashion_mnist_to_dirs_limited(
             os.makedirs(class_dir, exist_ok=True)
 
             # Fashion-MNIST images are 28x28 grayscale.
-            # Resize to 224x224 and convert to 3 channels (BGR for OpenCV).
-            image_resized = cv2.resize(image, (224, 224), interpolation=cv2.INTER_AREA)
+            # Resize to 128x128 and convert to 3 channels (BGR for OpenCV).
+            image_resized = cv2.resize(image, (128, 128), interpolation=cv2.INTER_AREA) # MODIFIED: Resized to 128x128
             image_bgr = cv2.cvtColor(image_resized, cv2.COLOR_GRAY2BGR) # Convert to 3 channels (BGR)
 
             image_path = os.path.join(class_dir, f"train_img_{i:05d}.png")
@@ -78,7 +78,7 @@ def convert_fashion_mnist_to_dirs_limited(
             os.makedirs(class_dir, exist_ok=True)
 
             # Resize and convert to 3 channels (BGR for OpenCV)
-            image_resized = cv2.resize(image, (224, 224), interpolation=cv2.INTER_AREA)
+            image_resized = cv2.resize(image, (128, 128), interpolation=cv2.INTER_AREA) # MODIFIED: Resized to 128x128
             image_bgr = cv2.cvtColor(image_resized, cv2.COLOR_GRAY2BGR) # Convert to 3 channels (BGR)
 
             image_path = os.path.join(class_dir, f"test_img_{i:05d}.png")
