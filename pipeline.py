@@ -27,7 +27,7 @@ class Pipeline:
         # Build model and get its specific preprocessing function
         print("Building Model ....")
         num_classes = y_train.shape[1]
-        model_builder = ModelBuilder(self.model_name, (224, 224, 3), num_classes, self.lr, self.epochs)
+        model_builder = ModelBuilder(self.model_name, (128, 128, 3), num_classes, self.lr, self.epochs) # MODIFIED: input_shape to (128, 128, 3)
         model, preprocess_input_fn = model_builder.build_model(num_classes)
 
         # Train and cross validate model
