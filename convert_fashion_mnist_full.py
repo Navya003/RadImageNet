@@ -47,11 +47,11 @@ def convert_fashion_mnist_to_dirs(output_base_dir="fashion_mnist_full_dataset"):
         if (i + 1) % 10000 == 0:
             print(f"  Saved {i + 1} training images.")
 
-    print(f"Finished saving {len(x_train)} training images.")
+    print(f"Finished saving {len(X_train)} training images.")
 
     print("Processing test data...")
     # Process test data
-    for i, (image, label) in enumerate(zip(x_test, y_test)):
+    for i, (image, label) in enumerate(zip(X_test, y_test)):
         class_name = class_names[label]
         class_output_dir = os.path.join(test_dir, class_name)
         os.makedirs(class_output_dir, exist_ok=True) # Ensure class directory exists
@@ -66,7 +66,7 @@ def convert_fashion_mnist_to_dirs(output_base_dir="fashion_mnist_full_dataset"):
         if (i + 1) % 2000 == 0:
             print(f"  Saved {i + 1} test images.")
 
-    print(f"Finished saving {len(x_test)} test images.")
+    print(f"Finished saving {len(X_test)} test images.")
     print(f"Fashion-MNIST conversion complete. Data saved to '{output_base_dir}'")
 
 if __name__ == "__main__":
